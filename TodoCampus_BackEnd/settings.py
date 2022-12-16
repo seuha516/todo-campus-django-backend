@@ -31,16 +31,12 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
 
-ASGI_APPLICATION = 'TodoCampus_BackEnd.asgi.application'
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'utils.jwtMiddleware.JsonWebTokenMiddleWare',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
