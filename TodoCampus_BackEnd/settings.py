@@ -76,11 +76,11 @@ WSGI_APPLICATION = 'TodoCampus_BackEnd.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'todocampus_db',
         'USER': 'todocampus_user',
         'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': 'mysql',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'auth_plugin': 'mysql_native_password'
