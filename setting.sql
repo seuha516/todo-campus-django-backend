@@ -1,8 +1,8 @@
 CREATE SCHEMA `TodoCampusDB` DEFAULT CHARACTER SET utf8mb4;
 use TodoCampusDB;
 
-create user 'TodoCampusUser'@'localhost' identified by 'qdted7Z6Q!';
-grant all privileges on TodoCampusDB.* to 'TodoCampusUser'@'localhost';
+create user 'TodoCampusUser'@'%' identified by 'qdted7Z6Q!';
+grant all privileges on TodoCampusDB.* to 'TodoCampusUser'@'%';
 FLUSH PRIVILEGES;
 
 CREATE TABLE `account` (
