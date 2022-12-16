@@ -1,6 +1,5 @@
 .env
 create.sql
-settings.py
 .idea
 .config
 
