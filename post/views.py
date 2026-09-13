@@ -33,10 +33,10 @@ def getList(request):
 
             cursor = connection.cursor()
             if tag=='':
-                strSQL="SELECT `num`, `nickname`, `title`, `body`, `publishedDate`, `comment`, `like` FROM post ORDER BY publishedDate DESC LIMIT %d, %d" % ((page-1)*pageVolume, pageVolume)
+                strSQL, params = "SELECT `num`, `nickname`, `title`, `body`, `publishedDate`, `comment`, `like` FROM post ORDER BY publishedDate DESC LIMIT %s, %s", [(page-1)*pageVolume, pageVolume]
             else:
-                strSQL = "SELECT `num`, `nickname`, `title`, `body`, `publishedDate`, `comment`, `like` FROM post WHERE %s MEMBER OF( tag ) ORDER BY publishedDate DESC LIMIT %d, %d" % ('\"%s\"' % tag, (page - 1) * pageVolume, pageVolume)
-            cursor.execute(strSQL)
+                strSQL, params = "SELECT `num`, `nickname`, `title`, `body`, `publishedDate`, `comment`, `like` FROM post WHERE %s MEMBER OF( tag ) ORDER BY publishedDate DESC LIMIT %s, %s", [tag, (page - 1) * pageVolume, pageVolume]
+            cursor.execute(strSQL, params)
             sqlData = cursor.fetchall()
             connection.close()
 

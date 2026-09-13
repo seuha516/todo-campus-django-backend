@@ -49,8 +49,7 @@ def getList(request):
         data['username'] = request.auth_username
         try:
             cursor = connection.cursor()
-            strSQL = "SELECT * FROM calendar WHERE username = \"" + data['username'] + "\";"
-            cursor.execute(strSQL)
+            cursor.execute("SELECT * FROM calendar WHERE username = %s", [data['username']])
             resultSQL = cursor.fetchall()
             connection.close()
 

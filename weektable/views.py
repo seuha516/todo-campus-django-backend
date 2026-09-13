@@ -16,8 +16,7 @@ def getList(request):
         key = request.auth_username
         try:
             cursor = connection.cursor()
-            strSQL = "SELECT * FROM weektable WHERE username = \"" + key + "\";"
-            cursor.execute(strSQL)
+            cursor.execute("SELECT * FROM weektable WHERE username = %s", [key])
             data = cursor.fetchall()
             connection.close()
 
@@ -77,8 +76,7 @@ def insert(request):
                 data['credit']=int(data['credit'])
 
             cursor = connection.cursor()
-            strSQL = "SELECT * FROM weektable WHERE username = \"" + data['username'] + "\";"
-            cursor.execute(strSQL)
+            cursor.execute("SELECT * FROM weektable WHERE username = %s", [data['username']])
             sqlData = cursor.fetchall()
             connection.close()
 
@@ -127,8 +125,7 @@ def update(request):
                 data['credit']=int(data['credit'])
 
             cursor = connection.cursor()
-            strSQL = "SELECT * FROM weektable WHERE username = \"" + data['username'] + "\";"
-            cursor.execute(strSQL)
+            cursor.execute("SELECT * FROM weektable WHERE username = %s", [data['username']])
             sqlData = cursor.fetchall()
             connection.close()
 

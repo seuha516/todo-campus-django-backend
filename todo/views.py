@@ -17,16 +17,15 @@ def getList(request):
         try:
             cursor = connection.cursor()
             if data['category'] == 'all0000000000':
-                strSQL = "SELECT * FROM todo WHERE username=\"%s\" ORDER BY noted DESC, due ASC" % data['username']
+                strSQL, params = "SELECT * FROM todo WHERE username=%s ORDER BY noted DESC, due ASC", [data['username']]
             elif data['category'] == 'noted0000000000':
-                strSQL = "SELECT * FROM todo WHERE username=\"%s\" AND (noted = 1 OR noted = -1) ORDER BY due ASC" % data['username']
+                strSQL, params = "SELECT * FROM todo WHERE username=%s AND (noted = 1 OR noted = -1) ORDER BY due ASC", [data['username']]
             elif data['category'] == 'done0000000000':
-                strSQL = "SELECT * FROM todo WHERE username=\"%s\" AND (due < NOW() OR noted < 0) ORDER BY noted DESC, due ASC" % data['username']
+                strSQL, params = "SELECT * FROM todo WHERE username=%s AND (due < NOW() OR noted < 0) ORDER BY noted DESC, due ASC", [data['username']]
             else:
-                strSQL = "SELECT * FROM todo WHERE username=\"%s\" AND category=\"%s\" ORDER BY noted DESC, due ASC" % (data['username'], data['category'])
+                strSQL, params = "SELECT * FROM todo WHERE username=%s AND category=%s ORDER BY noted DESC, due ASC", [data['username'], data['category']]
 
-            listSQL="SELECT DISTINCT category FROM todo WHERE username=\"%s\"" % data['username']
-            cursor.execute(listSQL)
+            cursor.execute("SELECT DISTINCT category FROM todo WHERE username=%s", [data['username']])
             sqlData = cursor.fetchall()
             categoryList = []
             isNone=False
@@ -38,7 +37,7 @@ def getList(request):
             if isNone:
                 categoryList.insert(0,'')
 
-            cursor.execute(strSQL)
+            cursor.execute(strSQL, params)
             sqlData = cursor.fetchall()
             connection.close()
             result = []

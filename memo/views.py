@@ -14,8 +14,7 @@ def getList(request):
         data['username'] = request.auth_username
         try:
             cursor = connection.cursor()
-            strSQL = "SELECT * FROM memo WHERE username = \"" + data['username'] + "\" ORDER BY num DESC"
-            cursor.execute(strSQL)
+            cursor.execute("SELECT * FROM memo WHERE username = %s ORDER BY num DESC", [data['username']])
             sqlData = cursor.fetchall()
             connection.close()
 
