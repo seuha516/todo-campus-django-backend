@@ -2,6 +2,7 @@ import json
 import bcrypt
 import jwt
 import os
+from datetime import datetime, timedelta
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
@@ -36,7 +37,7 @@ def register(request):
                 notice=None,
             ).save()
 
-            token=jwt.encode({'username':data['username']}, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM")).decode('utf-8')
+            token=jwt.encode({'username':data['username'], 'exp': datetime.utcnow() + timedelta(days=7)}, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM")).decode('utf-8')
             response=JsonResponse({"username":data['username'], "email":data['email'], "nickname":data['nickname'],
                                    "setting":None, "notice":None, "token": token}, status=200);
             return response
@@ -58,7 +59,7 @@ def login(request):
                 try:
                     decodedToken = jwt.decode(token, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM"))
                     if decodedToken['username']==data['username']:
-                        token = jwt.encode({'username': data['username']}, os.environ.get("JWT_SECRET"),
+                        token = jwt.encode({'username': data['username'], 'exp': datetime.utcnow() + timedelta(days=7)}, os.environ.get("JWT_SECRET"),
                                            os.environ.get("ALGORITHM")).decode('utf-8')
                         response = JsonResponse(
                             {"username": user.username, "email": user.email, "nickname": user.nickname,
@@ -79,7 +80,7 @@ def login(request):
                 return JsonResponse({"message": "비밀번호를 입력하세요."}, status=401)
 
             if bcrypt.checkpw(data['password'].encode('utf-8'), user.hashedPassword.encode('utf-8')):
-                token = jwt.encode({'username': data['username']}, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM")).decode('utf-8')
+                token = jwt.encode({'username': data['username'], 'exp': datetime.utcnow() + timedelta(days=7)}, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM")).decode('utf-8')
                 response = JsonResponse({"username":user.username, "email":user.email, "nickname":user.nickname,
                                          "setting":user.setting, "notice":user.notice, "token":token}, status=200);
                 return response
