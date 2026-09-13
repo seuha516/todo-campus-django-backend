@@ -6,6 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from .models import Post
+from TodoCampus_BackEnd.authentication import require_jwt
+from account.models import Account
 
 # Create your views here.
 def makeRandomString():
@@ -70,9 +72,12 @@ def read(request,num):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def write(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
+        data['nickname'] = Account.objects.get(username=data['username']).nickname
         try:
             if data['title']== '':
                 return JsonResponse({"message": "제목을 입력해야 합니다."}, status=401)
@@ -96,18 +101,21 @@ def write(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def update(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
+        data['nickname'] = Account.objects.get(username=data['username']).nickname
         try:
             if data['title'] == '':
                 return JsonResponse({"message": "제목을 입력해야 합니다."}, status=401)
             if data['body'] == '':
                 return JsonResponse({"message": "내용을 입력해야 합니다."}, status=401)
-            if not (Post.objects.filter(num=data['num'])).exists() :
+            if not (Post.objects.filter(num=data['num'], username=data['username'])).exists() :
                 return JsonResponse({"message": "글을 찾을 수 없습니다."}, status=401)
 
-            Post.objects.filter(num=data['num']).update(
+            Post.objects.filter(num=data['num'], username=data['username']).update(
                 nickname=data['nickname'],
                 title=data['title'],
                 body=data['body'],
@@ -120,22 +128,28 @@ def update(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def delete(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
+        data['nickname'] = Account.objects.get(username=data['username']).nickname
         try:
-            if not (Post.objects.filter(num=data['num'])).exists():
+            if not (Post.objects.filter(num=data['num'], username=data['username'])).exists():
                 return JsonResponse({"message": "글을 찾을 수 없습니다."}, status=401)
-            target = Post.objects.get(num=data['num'])
+            target = Post.objects.get(num=data['num'], username=data['username'])
             target.delete()
             return HttpResponse(status=200)
         except KeyError:
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def addComment(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
+        data['nickname'] = Account.objects.get(username=data['username']).nickname
         try:
             if not (Post.objects.filter(num=data['num'])).exists():
                 return JsonResponse({"message": "게시글을 찾을 수 없습니다."}, status=401)

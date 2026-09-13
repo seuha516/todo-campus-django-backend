@@ -3,12 +3,15 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from .models import Memo
+from TodoCampus_BackEnd.authentication import require_jwt
 
 # Create your views here.
 @csrf_exempt
+@require_jwt
 def getList(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
             cursor = connection.cursor()
             strSQL = "SELECT * FROM memo WHERE username = \"" + data['username'] + "\" ORDER BY num DESC"
@@ -30,9 +33,11 @@ def getList(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def write(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
             Memo(
                 username=data['username'],
@@ -43,13 +48,15 @@ def write(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def update(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
-            if not (Memo.objects.filter(num=data['num'])).exists():
+            if not (Memo.objects.filter(num=data['num'], username=data['username'])).exists():
                 return JsonResponse({"message": "데이터를 찾을 수 없습니다."}, status=401)
-            Memo.objects.filter(num=data['num']).update(
+            Memo.objects.filter(num=data['num'], username=data['username']).update(
                 body=data['body'],
             )
             return HttpResponse(status=200)
@@ -57,13 +64,15 @@ def update(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def delete(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
-            if not (Memo.objects.filter(num=data['num'])).exists():
+            if not (Memo.objects.filter(num=data['num'], username=data['username'])).exists():
                 return JsonResponse({"message": "데이터를 찾을 수 없습니다."}, status=401)
-            target = Memo.objects.get(num=data['num'])
+            target = Memo.objects.get(num=data['num'], username=data['username'])
             target.delete()
             return HttpResponse(status=200)
         except KeyError:

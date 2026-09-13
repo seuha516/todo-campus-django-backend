@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from .models import Calendar
+from TodoCampus_BackEnd.authentication import require_jwt
 
 # Create your views here.
 def daysOfYear(year):
@@ -41,9 +42,11 @@ def getSt(year, month):
     return st
 
 @csrf_exempt
+@require_jwt
 def getList(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
             cursor = connection.cursor()
             strSQL = "SELECT * FROM calendar WHERE username = \"" + data['username'] + "\";"
@@ -82,9 +85,11 @@ def getList(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def insert(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
             if data['name']== '':
                 return JsonResponse({"message": "이름을 반드시 입력해야 합니다."}, status=401)
@@ -108,9 +113,11 @@ def insert(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def update(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
             if data['name'] == '':
                 return JsonResponse({"message": "이름을 반드시 입력해야 합니다."}, status=401)
@@ -120,9 +127,9 @@ def update(request):
             if data['start']>data['end']:
                 return JsonResponse({"message": "시작 시간이 종료 시간보다 늦습니다."}, status=401)
 
-            if not (Calendar.objects.filter(num=data['num'])).exists() :
+            if not (Calendar.objects.filter(num=data['num'], username=data['username'])).exists() :
                 return JsonResponse({"message": "데이터를 찾을 수 없습니다."}, status=401)
-            Calendar.objects.filter(num=data['num']).update(
+            Calendar.objects.filter(num=data['num'], username=data['username']).update(
                 username=data['username'],
                 name=data['name'],
                 color=data['color'],
@@ -136,13 +143,15 @@ def update(request):
             return JsonResponse({"message": "알 수 없는 오류가 발생했습니다."}, status=500)
 
 @csrf_exempt
+@require_jwt
 def delete(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
+        data['username'] = request.auth_username
         try:
-            if not (Calendar.objects.filter(num=data['num'])).exists():
+            if not (Calendar.objects.filter(num=data['num'], username=data['username'])).exists():
                 return JsonResponse({"message": "데이터를 찾을 수 없습니다."}, status=401)
-            target = Calendar.objects.get(num=data['num'])
+            target = Calendar.objects.get(num=data['num'], username=data['username'])
             target.delete()
             return HttpResponse(status=200)
         except KeyError:
